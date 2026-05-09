@@ -19,7 +19,7 @@ set -euo pipefail
 # ==============================================================================
 
 # UUID del disco externo (obtén el tuyo con: blkid | grep -i "TYPE=\"ext4\"")
-DISK_UUID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+DISK_UUID="template"
 
 # Punto de montaje del disco externo
 MOUNT_POINT="/mnt/backups"
@@ -70,6 +70,11 @@ EXCLUDES=(
     "**/__pycache__"
     "**/*.log"
     "**/snap/*/common/.cache"
+    "**/.steam"
+    "**/.local/share/Steam"
+    "**/steamapps"
+    "**/.local/share/lutris"
+    "**/.local/share/heroic"
 )
 
 # Archivo de log
@@ -81,7 +86,7 @@ LOG_FILE="/var/log/backup-script.log"
 # --delete = elimina en destino archivos que ya no existen en origen
 # --numeric-ids = preserva UIDs/GIDs sin traducción de nombres
 # --human-readable = tamaños legibles en el log
-RSYNC_OPTS=(-aAXv --delete --numeric-ids --human-readable --stats)
+RSYNC_OPTS=(-aAXv --delete --numeric-ids --human-readable --stats --info=progress2 --no-v)
 
 # ==============================================================================
 #  SECCIÓN 2: COLORES PARA TERMINAL
@@ -348,7 +353,7 @@ run_backup() {
                  "${EXCLUDE_ARGS[@]}" \
                  "${source}/" \
                  "${BACKUP_DIR}${source}/" \
-                 >> "${LOG_FILE}" 2>&1; then
+                 2>> "${LOG_FILE}"; then
             log_done "Backup completado: ${source}"
         else
             log_error "Rsync falló para: ${source} (código: $?)"
